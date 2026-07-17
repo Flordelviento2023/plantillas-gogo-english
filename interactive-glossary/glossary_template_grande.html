@@ -1,0 +1,188 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Lato:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+.page{background:#f0ece3;min-height:100px;display:flex;flex-direction:column;align-items:center;padding:20px 16px;gap:16px;font-family:'Lato',sans-serif}
+.accordion-btn{width:100%;max-width:380px;background:#2d4a6e;border:none;border-radius:10px;padding:14px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:background 0.2s}
+.accordion-btn:hover{background:#1e3a5f}
+.accordion-btn.open{border-radius:10px 10px 0 0}
+.acc-left{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.acc-label{font-family:'Caveat',cursive;font-size:13px;color:#9db8d8;font-weight:500;letter-spacing:0.04em}
+.acc-title{font-family:'Caveat',cursive;font-size:22px;font-weight:700;color:#fff;line-height:1.1}
+.acc-arrow{font-size:18px;color:#9db8d8;transition:transform 0.3s;flex-shrink:0}
+.accordion-btn.open .acc-arrow{transform:rotate(180deg)}
+.notebook-wrap{width:100%;max-width:380px;background:#fffef9;border-radius:0 0 10px 10px;box-shadow:-6px 0 0 #c9b99a,-8px 0 0 #b5a48a,4px 4px 18px rgba(0,0,0,0.15);overflow:hidden;max-height:0;transition:max-height 0.4s ease,padding 0.3s}
+.notebook-wrap.open{max-height:3000px}
+.notebook{position:relative;padding:0 0 20px 0}
+.lines-bg{position:absolute;inset:0;background-image:repeating-linear-gradient(to bottom,transparent 0px,transparent 31px,#c5d8f0 31px,#c5d8f0 32px);background-position:0 0;pointer-events:none;opacity:0.45}
+.notebook::before{content:'';position:absolute;left:52px;top:0;bottom:0;width:1.5px;background:rgba(220,100,80,0.35)}
+.section-title{font-family:'Caveat',cursive;font-size:16px;font-weight:700;color:#c0522a;padding:10px 16px 4px 64px;letter-spacing:0.04em;position:relative}
+.word-list{padding:4px 16px 0 64px;list-style:none;position:relative}
+.word-item{padding:5px 0;border-bottom:1px dashed rgba(197,216,240,0.7);cursor:pointer;display:flex;align-items:center;gap:8px;transition:padding-left 0.2s}
+.word-item:last-child{border-bottom:none}
+.word-item:hover{padding-left:4px}
+.word-num{font-family:'Caveat',cursive;font-size:14px;color:#c0522a;min-width:18px;text-align:right;flex-shrink:0}
+.word-text{font-family:'Caveat',cursive;font-size:19px;font-weight:700;color:#1e3a5f;flex:1;line-height:1.2;text-decoration:underline;text-decoration-style:dotted;text-decoration-color:#6a9fd8;text-underline-offset:3px}
+.word-item:hover .word-text{color:#c0522a}
+.word-arrow{font-size:14px;color:#a09282;transition:transform 0.2s;flex-shrink:0}
+.word-item:hover .word-arrow{transform:translateX(3px);color:#c0522a}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;flex-shrink:0}
+.tag-verb{background:#e8f4e8;color:#2e6e2e;border:1px solid #b5d9b5}
+.tag-noun{background:#e8eef8;color:#1e3a7e;border:1px solid #b5c9ee}
+.divider-line{height:1px;background:rgba(197,216,240,0.8);margin:4px 16px 0 52px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(30,20,10,0.48);z-index:9999;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:#fffef9;border-radius:12px;width:100%;max-width:370px;box-shadow:0 8px 40px rgba(0,0,0,0.28);overflow:hidden;animation:popIn 0.22s cubic-bezier(0.34,1.56,0.64,1) both}
+@keyframes popIn{from{transform:scale(0.88);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-header{padding:16px 20px 12px;position:relative}
+.modal-word{font-family:'Caveat',cursive;font-size:30px;font-weight:700;color:#fff;line-height:1}
+.modal-ipa{font-size:14px;color:rgba(255,255,255,0.75);margin-top:2px}
+.modal-type{display:inline-block;font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;margin-top:6px;background:rgba(255,255,255,0.2);color:#fff}
+.modal-close{position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.18);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;line-height:28px;text-align:center;padding:0}
+.modal-close:hover{background:rgba(255,255,255,0.3)}
+.modal-body{padding:14px 20px 18px;display:flex;flex-direction:column;gap:11px}
+.info-label{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#c0522a;margin-bottom:2px}
+.info-text{font-size:13px;color:#2a2a2a;line-height:1.5}
+.info-example{font-size:13px;color:#5a6a7a;font-style:italic;line-height:1.5;background:#f0f4fa;border-left:3px solid #6a9fd8;padding:5px 10px;border-radius:0 6px 6px 0}
+.comic-ref{font-size:12px;color:#5a4a8a;font-style:italic;background:#f4f0fa;border-left:3px solid #a090cc;padding:5px 10px;border-radius:0 6px 6px 0}
+.translation-badge{display:inline-block;background:#fef3ec;border:1px solid #f0c8a0;border-radius:20px;padding:4px 14px;font-size:14px;color:#8a3a10;font-weight:700}
+.divider{height:1px;background:#e8e0d4;border:none;margin:0}
+.audio-btn{display:flex;align-items:center;gap:8px;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:14px;font-family:'Lato',sans-serif;font-weight:700;cursor:pointer;width:fit-content;transition:filter 0.15s,transform 0.1s}
+.audio-btn:active{transform:scale(0.97)}
+</style>
+
+<div class="page">
+
+<button class="accordion-btn" id="btn1" onclick="toggle(1)">
+  <div class="acc-left">
+    <span class="acc-label">Talking about changes</span>
+    <span class="acc-title">Verbs of change</span>
+  </div>
+  <span class="acc-arrow">&#9660;</span>
+</button>
+<div class="notebook-wrap" id="wrap1">
+  <div class="notebook">
+    <div class="lines-bg"></div>
+    <div class="section-title">Going UP &#x2191;</div>
+    <ul class="word-list" id="listUp"></ul>
+    <div class="divider-line"></div>
+    <div class="section-title">Going DOWN &#x2193;</div>
+    <ul class="word-list" id="listDown"></ul>
+  </div>
+</div>
+
+<button class="accordion-btn" id="btn2" onclick="toggle(2)">
+  <div class="acc-left">
+    <span class="acc-label">Talking about changes</span>
+    <span class="acc-title">Nouns</span>
+  </div>
+  <span class="acc-arrow">&#9660;</span>
+</button>
+<div class="notebook-wrap" id="wrap2">
+  <div class="notebook">
+    <div class="lines-bg"></div>
+    <ul class="word-list" id="listNouns"></ul>
+  </div>
+</div>
+
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header" id="mHeader">
+      <div class="modal-word" id="mWord"></div>
+      <div class="modal-ipa" id="mIpa"></div>
+      <div class="modal-type" id="mType"></div>
+      <button class="modal-close" onclick="closeModalDirect()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div><div class="info-label">&#128218; Definition (in English)</div><div class="info-text" id="mDef"></div></div>
+      <div class="info-example" id="mEx"></div>
+      <div class="comic-ref" id="mComic"></div>
+      <hr class="divider">
+      <div><div class="info-label">&#127466;&#127480; Traducci&#243;n al espa&#241;ol</div><span class="translation-badge" id="mTrans"></span></div>
+      <button class="audio-btn" id="audioBtn" onclick="playAudio()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+        Listen to pronunciation
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const verbsUp=[
+  {term:"rise",ipa:"/raɪz/",definition:"To go to a higher level or position.",example:'"Costs rose a lot last year." — Bean, Yummy Co.',comic:"Seen in the comic: Bean says costs rose!",translation:"subir / aumentar",color:"#2d6a2d",type:"verb — going up ↑"},
+  {term:"grow",ipa:"/ɡroʊ/",definition:"To become bigger or more over time.",example:'"We need to grow our business!" — Yummy Co. team',comic:"Seen in the comic: the team says 'We need to grow!'",translation:"crecer",color:"#2d6a2d",type:"verb — going up ↑"},
+  {term:"increase",ipa:"/ɪnˈkriːs/",definition:"To become larger in number or amount.",example:'"If government spending increases, the economy can get better."',comic:"Seen in the comic: panel 5.",translation:"aumentar / incrementar",color:"#2d6a2d",type:"verb — going up ↑"},
+  {term:"get better",ipa:"/ɡɛt ˈbɛtər/",definition:"To improve — to go from bad to good.",example:'"Things must get better!" — Yummy Co. team',comic:"Seen in the comic: panel 5.",translation:"mejorar",color:"#2d6a2d",type:"verb — going up ↑"},
+  {term:"go up",ipa:"/ɡoʊ ʌp/",definition:"To move to a higher level. Similar to 'rise'.",example:'"Profits must go up again!" — Yummy Co. meeting',comic:"Seen in the comic: panel 5.",translation:"subir",color:"#2d6a2d",type:"verb — going up ↑"}
+];
+const verbsDown=[
+  {term:"fall",ipa:"/fɔːl/",definition:"To go to a lower level. The opposite of rise.",example:'"Investment fell." — Noodle reads the data',comic:"Seen in the comic: panel 4.",translation:"caer / bajar",color:"#8a2020",type:"verb — going down ↓"},
+  {term:"go down",ipa:"/ɡoʊ daʊn/",definition:"To move to a lower level. Similar to 'fall'.",example:'"The sales are going down!" — Noodle, in the kitchen',comic:"Seen in the comic: panel 3.",translation:"bajar",color:"#8a2020",type:"verb — going down ↓"},
+  {term:"decrease",ipa:"/dɪˈkriːs/",definition:"To become smaller in number or amount.",example:'"If costs decrease, profits can increase."',comic:"",translation:"disminuir / reducirse",color:"#8a2020",type:"verb — going down ↓"},
+  {term:"get worse",ipa:"/ɡɛt wɜːrs/",definition:"To become worse — to go from bad to very bad.",example:'"The economy got worse last year." — Noodle checks the data',comic:"Seen in the comic: panel 4.",translation:"empeorar",color:"#8a2020",type:"verb — going down ↓"}
+];
+const nouns=[
+  {term:"profits",ipa:"/ˈprɒfɪts/",definition:"The money a company keeps after paying all its costs.",example:'"Our profits went down last year." — Bean',comic:"Seen in the comic: panels 1 and 5.",translation:"ganancias / utilidades",color:"#1e3a6e",type:"noun"},
+  {term:"costs",ipa:"/kɒsts/",definition:"The money a company must pay to make or sell something.",example:'"Costs rose a lot!" — Bean explains to Noodle',comic:"Seen in the comic: panel 2.",translation:"costos / costes",color:"#1e3a6e",type:"noun"},
+  {term:"taxes",ipa:"/ˈtæksɪz/",definition:"Money that people and companies pay to the government.",example:'"Taxes also rose last year." — Yummy Co. boardroom',comic:"Seen in the comic: panel 2.",translation:"impuestos",color:"#1e3a6e",type:"noun"},
+  {term:"government spending",ipa:"/ˈɡʌvərnmənt ˈspɛndɪŋ/",definition:"The money the government uses to pay for services and projects.",example:'"If government spending increases, the economy can get better."',comic:"Seen in the comic: panel 5.",translation:"gasto público / del gobierno",color:"#1e3a6e",type:"noun"},
+  {term:"inflation",ipa:"/ɪnˈfleɪʃən/",definition:"When prices go up and money buys less than before.",example:'"Inflation went up." — Noodle checks the data',comic:"Seen in the comic: panel 4.",translation:"inflación",color:"#1e3a6e",type:"noun"},
+  {term:"wages",ipa:"/ˈweɪdʒɪz/",definition:"The money workers receive for their work.",example:'"Wages rose in Year 1." — Bean explains costs',comic:"Seen in the comic: panels 2 and bottom strip.",translation:"salarios / sueldos",color:"#1e3a6e",type:"noun"},
+  {term:"the economy",ipa:"/ðə ɪˈkɒnəmi/",definition:"All the money, businesses, and work in a country.",example:'"The economy got worse." — Noodle',comic:"Seen in the comic: panels 4 and 5.",translation:"la economía",color:"#1e3a6e",type:"noun"},
+  {term:"sales",ipa:"/seɪlz/",definition:"The total amount of products a company sells.",example:'"The sales are going down!" — Noodle in the kitchen',comic:"Seen in the comic: panels 1, 3, and bottom strip.",translation:"ventas",color:"#1e3a6e",type:"noun"},
+  {term:"investment",ipa:"/ɪnˈvɛstmənt/",definition:"Money people put into a business or project to earn more money later.",example:'"Investment fell." — from the economy data',comic:"Seen in the comic: panel 4.",translation:"inversión",color:"#1e3a6e",type:"noun"},
+  {term:"employees",ipa:"/ɪmˈplɔɪiːz/",definition:"The people who work for a company.",example:'"Yummy Co. has many employees in its kitchen and offices."',comic:"",translation:"empleados / trabajadores",color:"#1e3a6e",type:"noun"},
+  {term:"customers",ipa:"/ˈkʌstəmərz/",definition:"People who buy products or services from a company.",example:'"We need more customers — NOW!" — Yummy Co. meeting',comic:"Seen in the comic: panel 5.",translation:"clientes",color:"#1e3a6e",type:"noun"}
+];
+
+function buildList(id,data,tagClass,tagLabel){
+  const ul=document.getElementById(id);
+  data.forEach((v,i)=>{
+    const li=document.createElement('li');li.className='word-item';
+    li.innerHTML=`<span class="word-num">${i+1}.</span><span class="word-text">${v.term}</span><span class="tag ${tagClass}">${tagLabel}</span><span class="word-arrow">&#8594;</span>`;
+    li.onclick=()=>openModal(v);ul.appendChild(li);
+  });
+}
+buildList('listUp',verbsUp,'tag-verb','verb');
+buildList('listDown',verbsDown,'tag-verb','verb');
+buildList('listNouns',nouns,'tag-noun','noun');
+
+function toggle(n){
+  const btn=document.getElementById('btn'+n);
+  const wrap=document.getElementById('wrap'+n);
+  btn.classList.toggle('open');
+  wrap.classList.toggle('open');
+}
+
+let currentWord='',currentColor='#2d4a6e';
+function openModal(v){
+  currentWord=v.term;currentColor=v.color;
+  document.getElementById('mWord').textContent=v.term;
+  document.getElementById('mIpa').textContent=v.ipa;
+  document.getElementById('mDef').textContent=v.definition;
+  document.getElementById('mEx').textContent=v.example;
+  document.getElementById('mTrans').textContent=v.translation;
+  document.getElementById('mType').textContent=v.type;
+  document.getElementById('mHeader').style.background=v.color;
+  const c=document.getElementById('mComic');
+  c.textContent=v.comic?'📰 '+v.comic:'';
+  c.style.display=v.comic?'block':'none';
+  const btn=document.getElementById('audioBtn');
+  btn.style.background=v.color;btn.classList.remove('playing');
+  btn.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> Listen to pronunciation`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(e){if(e.target===document.getElementById('modalOverlay'))closeModalDirect()}
+function closeModalDirect(){window.speechSynthesis&&window.speechSynthesis.cancel();document.getElementById('modalOverlay').classList.remove('open')}
+function playAudio(){
+  if(!('speechSynthesis' in window)){alert('Try Chrome or Edge for audio.');return}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(currentWord);u.lang='en-US';u.rate=0.8;
+  const btn=document.getElementById('audioBtn');
+  btn.style.background=currentColor;btn.classList.add('playing');
+  btn.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon></svg> Playing...`;
+  u.onend=()=>{btn.classList.remove('playing');btn.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> Listen to pronunciation`};
+  window.speechSynthesis.speak(u);
+}
+</script>
