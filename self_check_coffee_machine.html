@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Self-Check — The Coffee Machine Mix-Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#1f2a44;--coral:#ff6b5e;--yellow:#ffc94d;--purple:#5b2a86;--purple-light:#efe7f7;--bg:#f4f1fb;--text:22px;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--navy);padding:20px 16px 60px;}
+  h1{font-family:'Fredoka One',cursive;color:var(--purple);text-align:center;font-size:28px;margin-bottom:4px;}
+  .subtitle{text-align:center;font-size:17px;color:#666;margin-bottom:20px;}
+  .tabs{max-width:820px;margin:0 auto 24px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+  .tab{background:#fff;border:2px solid #e0d5f0;border-radius:20px;padding:8px 16px;font-weight:700;font-size:15px;cursor:pointer;color:var(--purple);}
+  .tab.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+  .section{max-width:820px;margin:0 auto;display:none;}
+  .section.active{display:block;}
+  .card{background:#fff;border-radius:16px;padding:20px 22px;margin-bottom:16px;box-shadow:0 4px 12px rgba(31,42,68,0.07);border:2px solid #eee;}
+  .q-title{font-family:'Fredoka One',cursive;font-size:18px;color:var(--navy);margin-bottom:10px;}
+  .q-text{font-size:var(--text);margin-bottom:12px;}
+  .options{display:flex;flex-direction:column;gap:8px;}
+  .opt{padding:10px 14px;border:2px solid #ddd;border-radius:10px;cursor:pointer;font-size:18px;text-decoration:underline;text-decoration-style:dotted;text-decoration-color:var(--coral);text-underline-offset:3px;}
+  .opt:hover{border-color:var(--purple);}
+  .opt.selected{border-color:var(--purple);background:var(--purple-light);}
+  .opt.correct{border-color:#27ae60;background:#e3f7e6;}
+  .opt.wrong{border-color:#e74c3c;background:#fde8e6;}
+  .verify-btn{display:block;margin:14px auto 4px;background:var(--coral);color:#fff;border:none;font-family:'Fredoka One',cursive;font-size:17px;padding:10px 26px;border-radius:24px;cursor:pointer;box-shadow:0 3px 0 #c94436;}
+  .verify-btn:disabled{background:#ccc;box-shadow:none;cursor:not-allowed;}
+  .feedback{margin-top:10px;font-weight:700;font-size:16px;padding:8px 12px;border-radius:8px;display:none;}
+  .feedback.show{display:block;}
+  .feedback.good{background:#e3f7e6;color:#227a3d;}
+  .feedback.bad{background:#fde8e6;color:#b3362a;}
+  .elicit-box{background:var(--purple-light);border-left:4px solid var(--purple);border-radius:10px;padding:14px 18px;margin-bottom:14px;font-size:var(--text);}
+  .reveal-btn{background:var(--purple);color:#fff;border:none;font-family:'Fredoka One',cursive;font-size:15px;padding:8px 18px;border-radius:20px;cursor:pointer;margin-top:8px;}
+  .reveal-text{display:none;margin-top:10px;background:#fff9f0;border-left:4px solid var(--yellow);padding:10px 14px;border-radius:8px;font-size:17px;}
+  .reveal-text.show{display:block;}
+  .score-panel{max-width:820px;margin:0 auto 20px;background:var(--purple);color:#fff;border-radius:16px;padding:14px 20px;display:flex;justify-content:space-between;font-family:'Fredoka One',cursive;font-size:17px;}
+  .fill-input{font-family:'Nunito',sans-serif;font-size:18px;border:none;border-bottom:2px solid var(--purple);background:transparent;padding:2px 6px;min-width:160px;}
+  .fill-input:disabled{color:#333;border-bottom-color:#bbb;}
+  .tap-en{cursor:pointer;border-bottom:2px dotted var(--coral);}
+  .tap-en:hover{background:#fff3ee;}
+  .es-translation{display:none;font-size:15px;color:#8a6a50;font-style:italic;margin-top:4px;background:#fff9f0;border-left:3px solid var(--yellow);padding:4px 10px;border-radius:6px;text-decoration:none;}
+  .es-translation.show{display:block;}
+</style>
+</head>
+<body>
+
+<h1>✅ Self-Check</h1>
+<p class="subtitle">The Coffee Machine Mix-Up</p>
+<p style="max-width:820px;margin:0 auto 16px;text-align:center;font-size:15px;color:#7a6a50;background:#fff9f0;border-radius:10px;padding:8px 14px;">💡 Don't worry if a word is new — just try your best guess!</p>
+
+<div class="score-panel">
+  <span>Checking Understanding + Uptake score:</span>
+  <span id="totalScore">0 / 10</span>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="understanding">1. Checking Understanding</div>
+  <div class="tab" data-tab="concepts">2. Checking Concepts</div>
+  <div class="tab" data-tab="uptake">3. Checking Uptake</div>
+</div>
+
+<!-- SECTION 1: CHECKING UNDERSTANDING -->
+<div class="section active" id="understanding">
+  <div class="card" data-qid="u1" data-points="1">
+    <div class="q-title">1</div>
+    <div class="q-text"><span class="tap-en" onclick="toggleEs(this)">Who does Mia think Tom is at the beginning of the story?</span><div class="es-translation">¿Quién cree Mia que es Tom al principio de la historia?</div></div>
+    <div class="options">
+      <div class="opt" data-correct="false" onclick="toggleEs(this)">The new manager<div class="es-translation">El nuevo gerente</div></div>
+      <div class="opt" data-correct="true" onclick="toggleEs(this)">The janitor<div class="es-translation">El conserje</div></div>
+      <div class="opt" data-correct="false" onclick="toggleEs(this)">A visitor<div class="es-translation">Un visitante</div></div>
+    </div>
+    <button class="verify-btn">Check</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="card" data-qid="u2" data-points="1">
+    <div class="q-title">2</div>
+    <div class="q-text"><span class="tap-en" onclick="toggleEs(this)">What does Mia ask Tom to fix?</span><div class="es-translation">¿Qué le pide Mia a Tom que arregle?</div></div>
+    <div class="options">
+      <div class="opt" data-correct="false" onclick="toggleEs(this)">The coffee machine<div class="es-translation">La máquina de café</div></div>
+      <div class="opt" data-correct="true" onclick="toggleEs(this)">Her desk lamp<div class="es-translation">Su lámpara de escritorio</div></div>
+      <div class="opt" data-correct="false" onclick="toggleEs(this)">Her computer<div class="es-translation">Su computadora</div></div>
+    </div>
+    <button class="verify-btn">Check</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="card" data-qid="u3" data-points="1">
+    <div class="q-title">3</div>
+    <div class="q-text"><span class="tap-en" onclick="toggleEs(this)">Who is Tom, really?</span><div class="es-translation">¿Quién es Tom, en realidad?</div></div>
+    <div class="options">
+      <div class="opt" data-correct="false" onclick="toggleEs(this)">A janitor<div class="es-translation">Un conserje</div></div>
+      <div class="opt" data-correct="false" onclick="toggleEs(this)">Mia's coworker from the Design Team<div class="es-translation">Compañero de Mia, del equipo de Diseño</div></div>
+      <div class="opt" data-correct="true" onclick="toggleEs(this)">The CEO of the company<div class="es-translation">El director general (CEO) de la empresa</div></div>
+    </div>
+    <button class="verify-btn">Check</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="card" data-qid="u4" data-points="1">
+    <div class="q-title">4</div>
+    <div class="q-text"><span class="tap-en" onclick="toggleEs(this)">How does Mia feel when she sees Tom is the boss?</span><div class="es-translation">¿Cómo se siente Mia cuando ve que Tom es el jefe?</div></div>
+    <div class="options">
+      <div class="opt" data-correct="false" onclick="toggleEs(this)">Calm<div class="es-translation">Tranquila</div></div>
+      <div class="opt" data-correct="true" onclick="toggleEs(this)">Shocked and embarrassed<div class="es-translation">Sorprendida y avergonzada</div></div>
+      <div class="opt" data-correct="false" onclick="toggleEs(this)">Angry<div class="es-translation">Enojada</div></div>
+    </div>
+    <button class="verify-btn">Check</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="card" data-qid="u5" data-points="1">
+    <div class="q-title">5</div>
+    <div class="q-text"><span class="tap-en" onclick="toggleEs(this)">At the end of the story, what does Tom say he will still do?</span><div class="es-translation">Al final de la historia, ¿qué dice Tom que igual va a hacer?</div></div>
+    <div class="options">
+      <div class="opt" data-correct="false" onclick="toggleEs(this)">Hire Mia<div class="es-translation">Contratar a Mia</div></div>
+      <div class="opt" data-correct="true" onclick="toggleEs(this)">Fix the lamp<div class="es-translation">Arreglar la lámpara</div></div>
+      <div class="opt" data-correct="false" onclick="toggleEs(this)">Have coffee with Mia<div class="es-translation">Tomar un café con Mia</div></div>
+    </div>
+    <button class="verify-btn">Check</button>
+    <div class="feedback"></div>
+  </div>
+</div>
+
+<!-- SECTION 2: CHECKING CONCEPTS (ELICITATION) -->
+<div class="section" id="concepts">
+  <div class="card">
+    <div class="q-title">👀 Look &amp; Notice</div>
+    <div class="elicit-box">
+      <strong>Sentence A:</strong> "Hello there. I'm Mia." <em>(to Tom, in the office)</em><br><br>
+      <strong>Sentence B:</strong> "Hi. I'm Mia Torres, from the Design Team." <em>(to the team, with the boss)</em>
+    </div>
+    <div class="q-text"><span class="tap-en" onclick="toggleEs(this)">Which sentence is more formal?</span><div class="es-translation">¿Qué oración es más formal?</div></div>
+    <button class="reveal-btn" onclick="this.nextElementSibling.classList.toggle('show')">Show the answer</button>
+    <div class="reveal-text"><strong>Sentence B</strong> is more formal. Mia uses her full name because she's talking to her boss, not just a coworker.</div>
+  </div>
+
+  <div class="card">
+    <div class="q-title">👀 Look &amp; Notice</div>
+    <div class="q-text"><span class="tap-en" onclick="toggleEs(this)">Look at Sentence B again: "Hi. I'm <strong>Mia Torres</strong>, from the <strong>Design Team</strong>." What extra information does Mia give here, that she didn't give in Sentence A?</span><div class="es-translation">Mira la Oración B otra vez. ¿Qué información extra da Mia aquí, que no dio en la Oración A?</div></div>
+    <button class="reveal-btn" onclick="this.nextElementSibling.classList.toggle('show')">Show the answer</button>
+    <div class="reveal-text">Her <strong>full name</strong> (not just "Mia") and her <strong>team/department</strong>. We usually add this information in formal introductions.</div>
+  </div>
+
+  <div class="card">
+    <div class="q-title">🤔 Think about it</div>
+    <div class="q-text"><span class="tap-en" onclick="toggleEs(this)">At your job: when do you say "Hi!"? When do you say "Good morning, how are you?"</span><div class="es-translation">¿Cuándo dices "¡Hola!" en tu trabajo? ¿Cuándo dices "Buenos días, ¿cómo estás?"?</div></div>
+    <button class="reveal-btn" onclick="this.nextElementSibling.classList.toggle('show')">Show an example</button>
+    <div class="reveal-text">Example: "I say 'Hi!' to my friends at work. I say 'Good morning, how are you?' to my boss or someone new."</div>
+  </div>
+</div>
+
+<!-- SECTION 3: CHECKING UPTAKE -->
+<div class="section" id="uptake">
+  <div class="card" data-qid="k1" data-points="1">
+    <div class="q-title">1</div>
+    <div class="q-text"><span class="tap-en" onclick="toggleEs(this)">You're meeting a coworker's friend at a casual office lunch. Which greeting fits best?</span><div class="es-translation">Vas a conocer al amigo de un compañero en un almuerzo informal de oficina. ¿Qué saludo es el más adecuado?</div></div>
+    <div class="options">
+      <div class="opt" data-correct="true" onclick="toggleEs(this)">"Hey there! How's it going?"<div class="es-translation">"¡Hola! ¿Cómo va todo?"</div></div>
+      <div class="opt" data-correct="false" onclick="toggleEs(this)">"Good afternoon. How do you do?"<div class="es-translation">"Buenas tardes. ¿Cómo está usted?"</div></div>
+    </div>
+    <button class="verify-btn">Check</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="card" data-qid="k2" data-points="1">
+    <div class="q-title">2</div>
+    <div class="q-text"><span class="tap-en" onclick="toggleEs(this)">You're introducing yourself to a new client in a formal meeting. Which greeting fits best?</span><div class="es-translation">Te estás presentando a un nuevo cliente en una reunión formal. ¿Qué saludo es el más adecuado?</div></div>
+    <div class="options">
+      <div class="opt" data-correct="false" onclick="toggleEs(this)">"Hi! What's up? I'm Diana."<div class="es-translation">"¡Hola! ¿Qué tal? Soy Diana."</div></div>
+      <div class="opt" data-correct="true" onclick="toggleEs(this)">"Good morning. My name is Diana, from the Sales Team."<div class="es-translation">"Buenos días. Mi nombre es Diana, del equipo de Ventas."</div></div>
+    </div>
+    <button class="verify-btn">Check</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="card" data-qid="k3" data-points="1">
+    <div class="q-title">3</div>
+    <div class="q-text"><span class="tap-en" onclick="toggleEs(this)">Complete the FORMAL introduction: "Nice to meet you. My ______ is Carla Reyes, from the Marketing Team."</span><div class="es-translation">Completa la presentación FORMAL: 'Mucho gusto. Mi ______ es Carla Reyes, del equipo de Marketing.'</div></div>
+    <input type="text" class="fill-input" placeholder="type the missing word">
+    <button class="verify-btn">Check</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="card" data-qid="k4" data-points="1">
+    <div class="q-title">4</div>
+    <div class="q-text"><span class="tap-en" onclick="toggleEs(this)">Complete the INFORMAL greeting: "______ there! How's it going?"</span><div class="es-translation">Completa el saludo INFORMAL: '¡______ ahí! ¿Cómo va todo?'</div></div>
+    <input type="text" class="fill-input" placeholder="type the missing word">
+    <button class="verify-btn">Check</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="card" data-qid="k5" data-points="1">
+    <div class="q-title">5</div>
+    <div class="q-text"><span class="tap-en" onclick="toggleEs(this)">Which phrase would sound out of place if you said it to your CEO in a formal meeting?</span><div class="es-translation">¿Qué frase sonaría fuera de lugar si se la dices a tu director general (CEO) en una reunión formal?</div></div>
+    <div class="options">
+      <div class="opt" data-correct="true" onclick="toggleEs(this)">"Hey! What's up?"<div class="es-translation">"¡Hola! ¿Qué tal?"</div></div>
+      <div class="opt" data-correct="false" onclick="toggleEs(this)">"Good afternoon. How are you today?"<div class="es-translation">"Buenas tardes. ¿Cómo está hoy?"</div></div>
+    </div>
+    <button class="verify-btn">Check</button>
+    <div class="feedback"></div>
+  </div>
+</div>
+
+<div class="tabs" style="margin-top:28px;">
+  <div class="tab active" data-tab="understanding">1. Checking Understanding</div>
+  <div class="tab" data-tab="concepts">2. Checking Concepts</div>
+  <div class="tab" data-tab="uptake">3. Checking Uptake</div>
+</div>
+
+<script>
+function toggleEs(el){
+  let t = el.querySelector('.es-translation');
+  if(!t) t = el.nextElementSibling;
+  if(t && t.classList.contains('es-translation')) t.classList.toggle('show');
+}
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    const target = tab.dataset.tab;
+    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===target));
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(target).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+
+let score = 0;
+const maxScore = 10;
+
+function norm(s){ return (s||'').trim().toLowerCase(); }
+
+document.querySelectorAll('.card[data-qid]').forEach(card=>{
+  const btn = card.querySelector('.verify-btn');
+  const fb = card.querySelector('.feedback');
+  const points = parseInt(card.dataset.points);
+  const options = card.querySelectorAll('.opt');
+  const input = card.querySelector('.fill-input');
+
+  if(options.length){
+    options.forEach(opt=>{
+      opt.addEventListener('click', ()=>{
+        if(btn.disabled) return;
+        options.forEach(o=>o.classList.remove('selected'));
+        opt.classList.add('selected');
+      });
+    });
+  }
+
+  btn.addEventListener('click', ()=>{
+    let earned = 0;
+    if(options.length){
+      const chosen = card.querySelector('.opt.selected');
+      if(!chosen){ fb.textContent='Please choose an option first.'; fb.className='feedback show bad'; return; }
+      options.forEach(o=>{
+        o.classList.remove('selected');
+        if(o.dataset.correct==='true') o.classList.add('correct');
+        else if(o===chosen) o.classList.add('wrong');
+      });
+      if(chosen.dataset.correct==='true') earned = points;
+    } else if(input){
+      const answers = {k3:['name'], k4:['hey','hi']};
+      const val = norm(input.value);
+      const ok = answers[card.dataset.qid].includes(val);
+      input.disabled = true;
+      input.style.borderBottomColor = ok ? '#27ae60' : '#e74c3c';
+      if(!ok){
+        input.insertAdjacentHTML('afterend', ' <span style="color:#227a3d;font-weight:700;">→ '+answers[card.dataset.qid][0]+'</span>');
+      }
+      if(ok) earned = points;
+    }
+    score += earned;
+    document.getElementById('totalScore').textContent = score + ' / ' + maxScore;
+    fb.textContent = earned>0 ? 'Correct! ✓' : 'Not quite — check the correct answer above.';
+    fb.className = 'feedback show ' + (earned>0?'good':'bad');
+    btn.disabled = true;
+  });
+});
+</script>
+
+</body>
+</html>
