@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bamboozle! — The Frog is in the Bathroom</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1a1a2e;--surface:#16213e;--accent:#e94560;--yellow:#f5a623;--green:#2ecc71;--red:#e74c3c;--purple:#9b59b6;--teal:#1abc9c;--blue:#3498db;--white:#ffffff;--light:#e8eaf6;--gray:#8892a4;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);min-height:100vh;color:var(--white);overflow-x:hidden;}
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+.screen.active{display:flex;}
+.game-logo{font-family:'Fredoka One',cursive;font-size:3.5rem;color:var(--yellow);text-shadow:4px 4px 0 var(--accent);margin-bottom:.2rem;letter-spacing:2px;animation:pulse-logo 2s infinite;}
+@keyframes pulse-logo{0%,100%{transform:scale(1);}50%{transform:scale(1.04);}}
+.game-sub{font-size:1rem;color:var(--gray);margin-bottom:2rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.setup-wrap{max-width:560px;width:100%;text-align:center;}
+.setup-box{background:var(--surface);border-radius:20px;padding:1.8rem;margin-bottom:1.5rem;border:1px solid rgba(255,255,255,.08);}
+.setup-box h3{font-size:1.1rem;font-weight:800;color:var(--yellow);margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
+.team-list{display:flex;flex-direction:column;gap:10px;margin-bottom:1rem;}
+.team-row{display:flex;gap:8px;align-items:center;}
+.team-color-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;}
+.team-input{flex:1;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 14px;font-size:1rem;font-family:'Nunito',sans-serif;color:var(--white);font-weight:700;transition:border .2s;}
+.team-input:focus{outline:none;border-color:var(--yellow);}
+.team-input::placeholder{color:var(--gray);font-weight:600;}
+.remove-btn{background:rgba(231,76,60,.2);border:none;border-radius:8px;color:var(--red);width:32px;height:32px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0;}
+.remove-btn:hover{background:rgba(231,76,60,.4);}
+.add-team-btn{background:rgba(245,166,35,.15);border:1.5px dashed var(--yellow);border-radius:10px;color:var(--yellow);padding:9px 20px;font-size:.95rem;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;transition:background .2s;}
+.add-team-btn:hover{background:rgba(245,166,35,.25);}
+.start-game-btn{background:linear-gradient(135deg,var(--accent),#c0392b);border:none;border-radius:50px;color:white;padding:16px 48px;font-size:1.25rem;font-weight:900;font-family:'Fredoka One',cursive;cursor:pointer;letter-spacing:1px;transition:transform .15s,box-shadow .15s;box-shadow:0 6px 24px rgba(233,69,96,.4);}
+.start-game-btn:hover{transform:scale(1.05);}
+.game-wrap{max-width:900px;width:100%;}
+.scoreboard{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem;}
+.score-card{background:var(--surface);border-radius:14px;padding:10px 20px;text-align:center;border:2px solid transparent;transition:border .2s,transform .2s;min-width:110px;}
+.score-card.active-team{border-color:var(--yellow);transform:scale(1.05);}
+.score-name{font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.score-pts{font-family:'Fredoka One',cursive;font-size:2rem;line-height:1;}
+.grid-title{font-family:'Fredoka One',cursive;font-size:1.4rem;text-align:center;color:var(--yellow);margin-bottom:1rem;letter-spacing:1px;}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem;}
+.tile{aspect-ratio:1;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:2rem;cursor:pointer;transition:transform .15s,box-shadow .15s;border:none;color:white;box-shadow:0 4px 14px rgba(0,0,0,.3);}
+.tile:hover:not(.used){transform:scale(1.06) rotate(-2deg);box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.tile.used{opacity:.25;cursor:default;transform:none;}
+.tile.bonus{border:3px solid var(--yellow);}
+.turn-indicator{text-align:center;font-size:1rem;font-weight:800;color:var(--gray);margin-bottom:.5rem;}
+.turn-indicator span{color:var(--yellow);}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,10,20,.88);z-index:100;align-items:center;justify-content:center;padding:1.5rem;}
+.modal-overlay.show{display:flex;animation:fadeIn .25s;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal{background:var(--surface);border-radius:24px;padding:2rem;max-width:600px;width:100%;border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.bonus-modal{text-align:center;}
+.bonus-icon{font-size:3.5rem;margin-bottom:.5rem;animation:spin-in .5s;}
+@keyframes spin-in{from{transform:rotate(-180deg) scale(0);}to{transform:rotate(0) scale(1);}}
+.bonus-title{font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--yellow);margin-bottom:.5rem;}
+.bonus-text{font-size:1.1rem;color:var(--light);margin-bottom:1.2rem;line-height:1.5;}
+.bonus-team-btns{display:flex;flex-direction:column;gap:10px;margin-bottom:1rem;}
+.bonus-team-btn{border:none;border-radius:14px;color:white;padding:12px 20px;font-size:1rem;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:transform .15s,opacity .15s;}
+.bonus-team-btn:hover{transform:scale(1.03);opacity:.9;}
+.bonus-ok-btn{background:linear-gradient(135deg,var(--yellow),#e67e22);border:none;border-radius:50px;color:white;padding:11px 32px;font-size:1rem;font-weight:900;font-family:'Fredoka One',cursive;cursor:pointer;letter-spacing:1px;transition:transform .15s;}
+.bonus-ok-btn:hover{transform:scale(1.05);}
+.q-team-label{font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-bottom:.5rem;}
+.q-number{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--accent);margin-bottom:.5rem;}
+.q-text{font-size:1.2rem;font-weight:800;color:var(--white);line-height:1.7;margin-bottom:1.3rem;background:rgba(255,255,255,.05);border-radius:14px;padding:1rem 1.2rem;}
+.timer-wrap{margin-bottom:1.1rem;}
+.timer-label{font-size:.85rem;font-weight:800;color:var(--gray);margin-bottom:5px;display:flex;justify-content:space-between;}
+.timer-bar-bg{background:rgba(255,255,255,.1);border-radius:50px;height:12px;overflow:hidden;}
+.timer-bar-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--green),var(--yellow));transition:width .1s linear,background .5s;width:100%;}
+.timer-bar-fill.danger{background:linear-gradient(90deg,var(--red),var(--accent));}
+.answer-reveal{background:rgba(46,204,113,.12);border:1.5px solid var(--green);border-radius:14px;padding:1rem 1.2rem;margin-bottom:1.1rem;display:none;animation:fadeIn .3s;}
+.answer-reveal.show{display:block;}
+.answer-label{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--green);margin-bottom:5px;}
+.answer-text{font-size:1.1rem;font-weight:800;color:var(--white);line-height:1.5;}
+.action-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.check-btn{background:linear-gradient(135deg,var(--blue),#2980b9);border:none;border-radius:50px;color:white;padding:12px 24px;font-size:1rem;font-weight:900;font-family:'Nunito',sans-serif;cursor:pointer;transition:transform .15s;display:flex;align-items:center;gap:7px;}
+.check-btn:hover{transform:scale(1.05);}
+.correct-btn{background:linear-gradient(135deg,var(--green),#27ae60);border:none;border-radius:50px;color:white;padding:12px 24px;font-size:1rem;font-weight:900;font-family:'Nunito',sans-serif;cursor:pointer;transition:transform .15s;display:none;align-items:center;gap:7px;}
+.correct-btn.show{display:flex;}
+.correct-btn:hover{transform:scale(1.05);}
+.oops-btn{background:linear-gradient(135deg,var(--red),#c0392b);border:none;border-radius:50px;color:white;padding:12px 24px;font-size:1rem;font-weight:900;font-family:'Nunito',sans-serif;cursor:pointer;transition:transform .15s;display:none;align-items:center;gap:7px;}
+.oops-btn.show{display:flex;}
+.oops-btn:hover{transform:scale(1.05);}
+.pts-flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Fredoka One',cursive;font-size:5rem;pointer-events:none;z-index:999;animation:pts-anim 1.2s forwards;opacity:0;}
+@keyframes pts-anim{0%{opacity:0;transform:translate(-50%,-50%) scale(.5);}20%{opacity:1;transform:translate(-50%,-60%) scale(1.2);}70%{opacity:1;transform:translate(-50%,-80%) scale(1);}100%{opacity:0;transform:translate(-50%,-100%) scale(.8);}}
+.finish-wrap{max-width:580px;width:100%;text-align:center;}
+.finish-logo{font-family:'Fredoka One',cursive;font-size:3rem;color:var(--yellow);text-shadow:3px 3px 0 var(--accent);margin-bottom:.5rem;}
+.finish-title{font-size:1.4rem;font-weight:800;color:var(--white);margin-bottom:1.5rem;}
+.podium{display:flex;flex-direction:column;gap:10px;margin-bottom:2rem;}
+.podium-row{display:flex;align-items:center;gap:14px;background:var(--surface);border-radius:14px;padding:12px 18px;border:1px solid rgba(255,255,255,.08);}
+.podium-rank{font-family:'Fredoka One',cursive;font-size:1.8rem;min-width:40px;}
+.podium-name{font-size:1.1rem;font-weight:800;flex:1;}
+.podium-pts{font-family:'Fredoka One',cursive;font-size:1.6rem;}
+.play-again-btn{background:linear-gradient(135deg,var(--accent),#c0392b);border:none;border-radius:50px;color:white;padding:14px 44px;font-size:1.2rem;font-weight:900;font-family:'Fredoka One',cursive;cursor:pointer;letter-spacing:1px;transition:transform .15s;box-shadow:0 6px 24px rgba(233,69,96,.4);}
+.play-again-btn:hover{transform:scale(1.05);}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+@media(max-width:600px){.grid{grid-template-columns:repeat(3,1fr);}.tile{font-size:1.5rem;}.q-text{font-size:1rem;}}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div class="screen active" id="screenSetup">
+  <div class="setup-wrap">
+    <div class="game-logo">BAMBOOZLE!</div>
+    <div class="game-sub">&#x1F438; The Frog is in the Bathroom</div>
+    <div class="setup-box">
+      <h3>&#x1F465; Add your teams or players</h3>
+      <div class="team-list" id="teamList"></div>
+      <button class="add-team-btn" onclick="addTeam()">+ Add team / player</button>
+    </div>
+    <button class="start-game-btn" onclick="startGame()">&#x1F3AE; Start Game!</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="screenGame">
+  <div class="game-wrap">
+    <div class="scoreboard" id="scoreboard"></div>
+    <div class="turn-indicator">&#x1F3AF; Current turn: <span id="currentTeamName">--</span></div>
+    <div class="grid-title">Choose a number!</div>
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- FINISH -->
+<div class="screen" id="screenFinish">
+  <div class="finish-wrap">
+    <div class="finish-logo">&#x1F3C6; BAMBOOZLE!</div>
+    <div class="finish-title">Game Over &mdash; Final Scores!</div>
+    <div class="podium" id="podium"></div>
+    <button class="play-again-btn" onclick="restartGame()">&#x1F504; Play Again</button>
+  </div>
+</div>
+
+<script>
+var teamColors = ['#e94560','#f5a623','#2ecc71','#3498db','#9b59b6','#1abc9c','#e67e22','#e74c3c'];
+
+var questions = [
+  {type:'comic', q:'Where is Leo at the beginning of the story?\na) In the kitchen\nb) In the bathroom\nc) In the garden', a:'b) In the bathroom'},
+  {type:'comic', q:'What is the frog doing on the toilet?\na) He is sleeping\nb) He is eating\nc) He is reading a comic book', a:'c) He is reading a comic book'},
+  {type:'comic', q:'What does the mom say when she hears the news?\na) "That is fine, honey. They are being very quiet."\nb) "Stop it right now!"\nc) "I am calling the doctor!"', a:'a) "That is fine, honey. They are being very quiet."'},
+  {type:'comic', q:'What is the last thing the girl says?\na) "We are learning together!"\nb) "I am the only normal person in this family!"\nc) "Frogs cannot read, Leo!"', a:'b) "I am the only normal person in this family!"'},
+  {type:'grammar', q:'Complete with the correct form:\n"He ___ my comic book." (read)', a:"He's reading / He is reading my comic book."},
+  {type:'grammar', q:'Complete with the correct form:\n"What ___ you ___ ?" (do)', a:'What are you doing?'},
+  {type:'grammar', q:'Complete with the correct form:\n"We ___ together." (learn)', a:"We're learning / We are learning together."},
+  {type:'grammar', q:'Complete with the correct form:\n"They ___ very quiet." (be)', a:'They are being very quiet.'},
+  {type:'grammar', q:'Which sentence uses Present Continuous CORRECTLY?\na) He sitting on the toilet.\nb) He is sitting on the toilet.\nc) He sits on the toilet right now.', a:'b) He is sitting on the toilet.'}
+];
+
+var bonuses = [
+  {icon:'&#x1F381;', title:'Lucky Bonus!', text:'Steal 25 points from any team!', type:'steal'},
+  {icon:'&#x23ED;&#xFE0F;', title:'Bad Luck!', text:'Lose your turn! The next team plays.', type:'skip'},
+  {icon:'&#x1F504;', title:'Swap!', text:'Swap your score with another team!', type:'swap'}
+];
+
+var tileColors = ['#e94560','#9b59b6','#3498db','#1abc9c','#f5a623','#e67e22','#2ecc71','#e74c3c','#16a085','#8e44ad','#2980b9','#d35400'];
+
+var teams = [];
+var currentTeamIdx = 0;
+var timerInterval = null;
+var timerSeconds = 20;
+var currentTileIdx = null;
+var answered = false;
+var tileOrder = [];
+
+function addTeam(name) {
+  var idx = teams.length;
+  if (idx >= 8) return;
+  teams.push({name: name || '', score: 0, color: teamColors[idx]});
+  renderTeamList();
+}
+
+function removeTeam(idx) {
+  teams.splice(idx, 1);
+  renderTeamList();
+}
+
+function renderTeamList() {
+  var list = document.getElementById('teamList');
+  list.innerHTML = '';
+  teams.forEach(function(t, i) {
+    var row = document.createElement('div');
+    row.className = 'team-row';
+    row.innerHTML =
+      '<div class="team-color-dot" style="background:' + t.color + '"></div>' +
+      '<input class="team-input" placeholder="Team / Player name..." value="' + t.name + '" oninput="teams[' + i + '].name=this.value">' +
+      '<button class="remove-btn" onclick="removeTeam(' + i + ')">x</button>';
+    list.appendChild(row);
+  });
+}
+
+addTeam('Team A');
+addTeam('Team B');
+
+function startGame() {
+  var inputs = document.querySelectorAll('.team-input');
+  teams.forEach(function(t, i) {
+    if (inputs[i]) t.name = inputs[i].value.trim() || ('Team ' + (i + 1));
+  });
+  if (teams.length < 1) { alert('Add at least one team!'); return; }
+  var qIdxs = questions.map(function(_, i) { return {kind:'q', idx:i}; });
+  var bIdxs = bonuses.map(function(_, i) { return {kind:'b', idx:i}; });
+  tileOrder = qIdxs.concat(bIdxs).sort(function() { return Math.random() - 0.5; });
+  currentTeamIdx = 0;
+  document.getElementById('screenSetup').classList.remove('active');
+  document.getElementById('screenGame').classList.add('active');
+  renderScoreboard();
+  renderGrid();
+  updateTurnIndicator();
+}
+
+function renderScoreboard() {
+  var sb = document.getElementById('scoreboard');
+  sb.innerHTML = '';
+  teams.forEach(function(t, i) {
+    var card = document.createElement('div');
+    card.className = 'score-card' + (i === currentTeamIdx ? ' active-team' : '');
+    card.id = 'scorecard-' + i;
+    card.innerHTML =
+      '<div class="score-name" style="color:' + t.color + '">' + t.name + '</div>' +
+      '<div class="score-pts" style="color:' + t.color + '" id="score-pts-' + i + '">' + t.score + '</div>';
+    sb.appendChild(card);
+  });
+}
+
+function updateScoreboard() {
+  teams.forEach(function(t, i) {
+    var card = document.getElementById('scorecard-' + i);
+    var pts = document.getElementById('score-pts-' + i);
+    if (card) card.className = 'score-card' + (i === currentTeamIdx ? ' active-team' : '');
+    if (pts) pts.textContent = t.score;
+  });
+}
+
+function updateTurnIndicator() {
+  var el = document.getElementById('currentTeamName');
+  if (teams[currentTeamIdx]) {
+    el.textContent = teams[currentTeamIdx].name;
+    el.style.color = teams[currentTeamIdx].color;
+  }
+}
+
+function renderGrid() {
+  var grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  tileOrder.forEach(function(tile, i) {
+    var btn = document.createElement('button');
+    btn.className = 'tile' + (tile.kind === 'b' ? ' bonus' : '');
+    btn.id = 'tile-' + i;
+    btn.style.background = 'linear-gradient(135deg,' + tileColors[i] + ',' + tileColors[(i + 3) % 12] + '88)';
+    btn.textContent = i + 1;
+    btn.onclick = (function(idx) { return function() { openTile(idx); }; })(i);
+    grid.appendChild(btn);
+  });
+}
+
+function openTile(idx) {
+  var tile = document.getElementById('tile-' + idx);
+  if (tile.classList.contains('used')) return;
+  currentTileIdx = idx;
+  var item = tileOrder[idx];
+  if (item.kind === 'b') { openBonus(item.idx); }
+  else { openQuestion(item.idx); }
+}
+
+function openBonus(bIdx) {
+  var bonus = bonuses[bIdx];
+  var overlay = document.getElementById('modalOverlay');
+  var content = document.getElementById('modalContent');
+  var html = '<div class="bonus-modal">';
+  html += '<div class="bonus-icon">' + bonus.icon + '</div>';
+  html += '<div class="bonus-title">' + bonus.title + '</div>';
+  html += '<div class="bonus-text">' + bonus.text + '</div>';
+  if (bonus.type === 'steal') {
+    var others = teams.filter(function(_, i) { return i !== currentTeamIdx; });
+    if (others.length === 0) {
+      html += '<button class="bonus-ok-btn" onclick="executeBonusSkip()">OK (no other teams)</button>';
+    } else {
+      html += '<div class="bonus-team-btns">';
+      teams.forEach(function(t, i) {
+        if (i === currentTeamIdx) return;
+        html += '<button class="bonus-team-btn" style="background:linear-gradient(135deg,' + t.color + ',#00000044);" onclick="executeSteal(' + i + ')">Steal 25 pts from <strong>' + t.name + '</strong> &nbsp;(' + t.score + ' pts)</button>';
+      });
+      html += '</div>';
+    }
+  } else if (bonus.type === 'skip') {
+    html += '<button class="bonus-ok-btn" style="background:linear-gradient(135deg,#e74c3c,#c0392b);" onclick="executeLoseTurn()">OK &mdash; skip my turn</button>';
+  } else if (bonus.type === 'swap') {
+    var swapOthers = teams.filter(function(_, i) { return i !== currentTeamIdx; });
+    if (swapOthers.length === 0) {
+      html += '<button class="bonus-ok-btn" onclick="executeBonusSkip()">OK (no other teams)</button>';
+    } else {
+      html += '<div class="bonus-team-btns">';
+      teams.forEach(function(t, i) {
+        if (i === currentTeamIdx) return;
+        html += '<button class="bonus-team-btn" style="background:linear-gradient(135deg,' + t.color + ',#00000044);" onclick="executeSwap(' + i + ')">Swap with <strong>' + t.name + '</strong> &nbsp;(' + teams[currentTeamIdx].score + ' pts &harr; ' + t.score + ' pts)</button>';
+      });
+      html += '</div>';
+    }
+  }
+  html += '</div>';
+  content.innerHTML = html;
+  overlay.classList.add('show');
+}
+
+function executeSteal(fromIdx) {
+  teams[fromIdx].score = Math.max(0, teams[fromIdx].score - 25);
+  teams[currentTeamIdx].score += 25;
+  showPtsFlash('+25');
+  closeBonusAndContinue();
+}
+
+function executeLoseTurn() { closeBonusAndContinue(); }
+
+function executeSwap(withIdx) {
+  var temp = teams[currentTeamIdx].score;
+  teams[currentTeamIdx].score = teams[withIdx].score;
+  teams[withIdx].score = temp;
+  showPtsFlash('SWAP!');
+  closeBonusAndContinue();
+}
+
+function executeBonusSkip() { closeBonusAndContinue(); }
+
+function closeBonusAndContinue() {
+  markTileUsed(currentTileIdx);
+  document.getElementById('modalOverlay').classList.remove('show');
+  updateScoreboard();
+  checkAllUsed();
+}
+
+function openQuestion(qIdx) {
+  clearInterval(timerInterval);
+  answered = false;
+  timerSeconds = 20;
+  var q = questions[qIdx];
+  var team = teams[currentTeamIdx];
+  var overlay = document.getElementById('modalOverlay');
+  var content = document.getElementById('modalContent');
+  var badge = q.type === 'comic' ? '&#x1F438; Comic' : '&#x270F;&#xFE0F; Grammar';
+  var badgeColor = q.type === 'comic' ? '#1abc9c' : '#9b59b6';
+  var formattedQ = q.q.replace(/\n/g, '<br>');
+  var html = '<div class="q-team-label" style="color:' + team.color + '">&#x1F3AF; ' + team.name + '&#39;s turn</div>';
+  html += '<div class="q-number" style="color:' + badgeColor + '">' + badge + '</div>';
+  html += '<div class="q-text">' + formattedQ + '</div>';
+  html += '<div class="timer-wrap">';
+  html += '<div class="timer-label"><span>&#x23F1; Time</span><span id="timerSecs">20s</span></div>';
+  html += '<div class="timer-bar-bg"><div class="timer-bar-fill" id="timerBar"></div></div>';
+  html += '</div>';
+  html += '<div class="answer-reveal" id="answerReveal">';
+  html += '<div class="answer-label">&#x2705; Answer</div>';
+  html += '<div class="answer-text">' + q.a + '</div>';
+  html += '</div>';
+  html += '<div class="action-row">';
+  html += '<button class="check-btn" id="checkBtn" onclick="revealAnswer()">&#x1F441; Show Answer</button>';
+  html += '<button class="correct-btn" id="correctBtn" onclick="markCorrect()">&#x2705; Correct! +50</button>';
+  html += '<button class="oops-btn" id="oopsBtn" onclick="markWrong()">&#x274C; Oops! +0</button>';
+  html += '</div>';
+  content.innerHTML = html;
+  overlay.classList.add('show');
+  startTimer();
+}
+
+function startTimer() {
+  timerSeconds = 20;
+  updateTimerUI();
+  timerInterval = setInterval(function() {
+    timerSeconds--;
+    updateTimerUI();
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) revealAnswer();
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  var secsEl = document.getElementById('timerSecs');
+  var barEl = document.getElementById('timerBar');
+  if (!secsEl || !barEl) return;
+  secsEl.textContent = timerSeconds + 's';
+  barEl.style.width = ((timerSeconds / 20) * 100) + '%';
+  if (timerSeconds <= 7) { barEl.classList.add('danger'); }
+  else { barEl.classList.remove('danger'); }
+}
+
+function revealAnswer() {
+  if (answered) return;
+  clearInterval(timerInterval);
+  answered = true;
+  var reveal = document.getElementById('answerReveal');
+  var checkBtn = document.getElementById('checkBtn');
+  var correctBtn = document.getElementById('correctBtn');
+  var oopsBtn = document.getElementById('oopsBtn');
+  if (reveal) reveal.classList.add('show');
+  if (checkBtn) checkBtn.style.display = 'none';
+  if (correctBtn) correctBtn.classList.add('show');
+  if (oopsBtn) oopsBtn.classList.add('show');
+}
+
+function markCorrect() {
+  teams[currentTeamIdx].score += 50;
+  showPtsFlash('+50');
+  closeQuestionAndContinue();
+}
+
+function markWrong() {
+  showPtsFlash('+0');
+  closeQuestionAndContinue();
+}
+
+function closeQuestionAndContinue() {
+  clearInterval(timerInterval);
+  markTileUsed(currentTileIdx);
+  document.getElementById('modalOverlay').classList.remove('show');
+  updateScoreboard();
+  checkAllUsed();
+}
+
+function markTileUsed(idx) {
+  var tile = document.getElementById('tile-' + idx);
+  if (tile) tile.classList.add('used');
+}
+
+function checkAllUsed() {
+  var allUsed = tileOrder.every(function(_, i) {
+    var t = document.getElementById('tile-' + i);
+    return t && t.classList.contains('used');
+  });
+  if (allUsed) { setTimeout(showFinish, 600); }
+  else { nextTeam(); }
+}
+
+function nextTeam() {
+  currentTeamIdx = (currentTeamIdx + 1) % teams.length;
+  updateScoreboard();
+  updateTurnIndicator();
+}
+
+function showPtsFlash(text) {
+  var flash = document.createElement('div');
+  flash.className = 'pts-flash';
+  flash.style.color = (text.indexOf('+') === 0 || text === 'SWAP!') ? '#2ecc71' : '#e74c3c';
+  flash.textContent = text;
+  document.body.appendChild(flash);
+  setTimeout(function() { flash.remove(); }, 1200);
+}
+
+function launchConfetti() {
+  var colors = ['#e94560','#f5a623','#2ecc71','#3498db','#9b59b6','#1abc9c','#fff'];
+  var total = 120;
+  for (var i = 0; i < total; i++) {
+    (function(i) {
+      setTimeout(function() {
+        var piece = document.createElement('div');
+        var size = Math.random() * 10 + 6;
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        var left = Math.random() * 100;
+        var duration = Math.random() * 2 + 2;
+        var delay = Math.random() * 1.5;
+        var rotation = Math.random() * 360;
+        var shape = Math.random() > 0.5 ? '50%' : '0%';
+        piece.style.cssText =
+          'position:fixed;top:-20px;left:' + left + '%;width:' + size + 'px;height:' + size + 'px;' +
+          'background:' + color + ';border-radius:' + shape + ';z-index:9999;pointer-events:none;' +
+          'animation:confettiFall ' + duration + 's ' + delay + 's ease-in forwards;' +
+          'transform:rotate(' + rotation + 'deg);opacity:1;';
+        document.body.appendChild(piece);
+        setTimeout(function() { piece.remove(); }, (duration + delay + 0.5) * 1000);
+      }, i * 18);
+    })(i);
+  }
+}
+
+function showFinish() {
+  document.getElementById('screenGame').classList.remove('active');
+  document.getElementById('screenFinish').classList.add('active');
+  launchConfetti();
+  var sorted = teams.slice().sort(function(a, b) { return b.score - a.score; });
+  var medals = ['&#x1F947;','&#x1F948;','&#x1F949;'];
+  var podium = document.getElementById('podium');
+  podium.innerHTML = '';
+  sorted.forEach(function(t, i) {
+    var row = document.createElement('div');
+    row.className = 'podium-row';
+    row.innerHTML =
+      '<div class="podium-rank">' + (medals[i] || (i + 1) + '.') + '</div>' +
+      '<div class="podium-name" style="color:' + t.color + '">' + t.name + '</div>' +
+      '<div class="podium-pts" style="color:' + t.color + '">' + t.score + ' pts</div>';
+    podium.appendChild(row);
+  });
+}
+
+function restartGame() {
+  teams.forEach(function(t) { t.score = 0; });
+  currentTeamIdx = 0;
+  document.getElementById('screenFinish').classList.remove('active');
+  document.getElementById('screenSetup').classList.add('active');
+  renderTeamList();
+}
+</script>
+</body>
+</html>
