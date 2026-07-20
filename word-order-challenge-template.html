@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Order Challenge!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e74c3c;--red-dark:#c0392b;--green:#2ecc71;--green-dark:#1a9e52;--green-light:#d5f5e3;--blue:#3498db;--blue-dark:#2176ae;--blue-light:#d6eaf8;--gold:#f1c40f;--gold-dark:#d4ac0d;--orange:#e67e22;--purple:#9b59b6;--dark:#2c3e50;--gray:#7f8c8d;--cream:#fef9f0;--border:#ddd;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"Nunito",sans-serif;background:var(--cream);color:var(--dark);min-height:100vh;padding-bottom:50px;}
+  .page-header{background:linear-gradient(135deg,#2c3e50,#3d5a80);padding:18px 24px;text-align:center;position:relative;overflow:hidden;}
+  .page-header::before{content:"\1F500";position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:2rem;}
+  .page-header::after{content:"\1F3A4";position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:2rem;}
+  .page-header h1{font-family:"Fredoka One",cursive;font-size:2rem;color:var(--gold);letter-spacing:2px;text-shadow:2px 2px 0 rgba(0,0,0,0.3);}
+  .page-header p{font-size:0.85rem;color:rgba(255,255,255,0.55);margin-top:3px;}
+  /* Stats */
+  .stats-bar{max-width:680px;margin:20px auto 0;padding:0 16px;display:none;}
+  .stats-bar.show{display:block;}
+  .stats-inner{background:white;border-radius:14px;padding:14px 18px;box-shadow:0 3px 12px rgba(0,0,0,0.08);display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .stat-item{display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .stat-label{font-size:0.65rem;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#aaa;}
+  .stat-value{font-family:"Fredoka One",cursive;font-size:1.8rem;color:var(--dark);line-height:1;}
+  .stat-value.score-val{color:var(--green-dark);}
+  .stat-value.q-val{color:var(--blue-dark);}
+  .timer-wrap{flex:1;min-width:120px;}
+  .timer-lbl{text-align:center;font-size:0.65rem;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#aaa;margin-bottom:4px;}
+  .timer-display{font-family:"Fredoka One",cursive;font-size:2.2rem;color:var(--green-dark);text-align:center;transition:color 0.3s;}
+  .timer-bar-track{height:10px;background:#eee;border-radius:10px;overflow:hidden;margin-top:4px;}
+  .timer-bar-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:10px;transition:width 1s linear,background 0.5s;width:100%;}
+  /* Intro */
+  .intro-screen{max-width:680px;margin:24px auto;padding:0 16px;}
+  .intro-inner{background:linear-gradient(135deg,#667eea,#764ba2);border-radius:20px;padding:32px 24px;text-align:center;box-shadow:0 6px 24px rgba(102,126,234,0.35);}
+  .intro-title{font-family:"Fredoka One",cursive;font-size:1.8rem;color:white;margin-bottom:12px;}
+  .intro-steps{text-align:left;background:rgba(255,255,255,0.15);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;flex-direction:column;gap:10px;}
+  .intro-step{font-size:0.95rem;font-weight:700;color:white;display:flex;gap:10px;align-items:flex-start;line-height:1.5;}
+  .step-num{background:var(--gold);color:var(--dark);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:900;flex-shrink:0;}
+  .btn-start{font-family:"Fredoka One",cursive;font-size:1.3rem;color:var(--purple);background:var(--gold);border:none;border-radius:30px;padding:14px 40px;cursor:pointer;box-shadow:0 5px 0 var(--gold-dark);transition:all 0.2s;letter-spacing:1px;}
+  .btn-start:hover{transform:translateY(-3px);box-shadow:0 8px 0 var(--gold-dark);}
+  /* Game card */
+  .game-card{max-width:680px;margin:20px auto 0;padding:0 16px;display:none;}
+  .game-card.show{display:block;}
+  .card-inner{background:white;border-radius:20px;padding:24px;box-shadow:0 4px 20px rgba(0,0,0,0.1);border:3px solid var(--blue);}
+  .card-inner.state-correct{border-color:var(--green);}
+  .card-inner.state-wrong{border-color:var(--red);}
+  .card-inner.state-retry{border-color:var(--orange);}
+  .q-label{font-size:0.7rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:var(--gray);margin-bottom:12px;}
+  /* Scrambled */
+  .scrambled-area{margin-bottom:16px;}
+  .area-label{font-size:0.78rem;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+  .scrambled-words{display:flex;flex-wrap:wrap;gap:8px;min-height:44px;}
+  .word-tile{background:var(--dark);color:white;border-radius:8px;padding:8px 14px;font-family:"Fredoka One",cursive;font-size:1rem;cursor:grab;user-select:none;transition:all 0.2s;box-shadow:0 3px 0 rgba(0,0,0,0.3);}
+  .word-tile:hover{transform:translateY(-2px);box-shadow:0 5px 0 rgba(0,0,0,0.3);background:#444;}
+  .word-tile.dragging{opacity:0.4;}
+  .word-tile.used{opacity:0.15;pointer-events:none;}
+  /* Answer drop */
+  .answer-area{margin-bottom:16px;}
+  .answer-drop{min-height:52px;border:2px dashed var(--border);border-radius:12px;background:#f8f9fa;padding:8px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;transition:all 0.2s;}
+  .answer-drop.drag-over{border-color:var(--blue);background:var(--blue-light);}
+  .drop-hint{font-size:0.82rem;color:#bbb;font-weight:700;}
+  .placed-tile{background:var(--blue);color:white;border-radius:8px;padding:8px 14px;font-family:"Fredoka One",cursive;font-size:1rem;display:flex;align-items:center;gap:6px;box-shadow:0 2px 0 var(--blue-dark);}
+  .placed-tile.correct-tile{background:var(--green);box-shadow:0 2px 0 var(--green-dark);}
+  .placed-tile.wrong-tile{background:var(--red);box-shadow:0 2px 0 var(--red-dark);}
+  .remove-tile{background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;font-size:0.8rem;}
+  .remove-tile:hover{color:white;}
+  /* Mic section */
+  .mic-section{background:#f0f8ff;border-radius:12px;padding:14px 16px;margin-bottom:14px;border:2px dashed var(--blue);transition:all 0.3s;}
+  .mic-section.disabled{opacity:0.4;pointer-events:none;}
+  .mic-instruction{font-size:0.9rem;font-weight:700;color:var(--blue-dark);margin-bottom:10px;text-align:center;}
+  .mic-controls{display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .btn-mic{width:56px;height:56px;border-radius:50%;background:var(--dark);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:all 0.2s;box-shadow:0 4px 0 rgba(0,0,0,0.3);}
+  .btn-mic:hover{transform:translateY(-2px);background:#444;}
+  .btn-mic.listening{background:var(--red);animation:micPulse 0.8s ease infinite;}
+  .btn-mic.no-support{background:#ccc;cursor:not-allowed;}
+  @keyframes micPulse{0%,100%{box-shadow:0 0 0 4px rgba(231,76,60,0.2)}50%{box-shadow:0 0 0 12px rgba(231,76,60,0.1)}}
+  .mic-transcript{background:white;border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:0.95rem;font-weight:700;color:var(--gray);min-width:180px;min-height:36px;text-align:center;flex:1;font-style:italic;}
+  .mic-transcript.has-text{font-style:normal;color:var(--dark);}
+  /* Retry hint */
+  .retry-hint{background:#fef5e7;border:2px solid var(--orange);border-radius:10px;padding:10px 14px;font-size:0.9rem;font-weight:700;color:#935116;text-align:center;margin-bottom:14px;display:none;}
+  .retry-hint.show{display:block;}
+  /* Drag section */
+  .drag-section{opacity:0.35;pointer-events:none;transition:all 0.3s;}
+  .drag-section.enabled{opacity:1;pointer-events:all;}
+  /* Action buttons */
+  .action-btns{display:flex;gap:10px;flex-wrap:wrap;}
+  .btn-check-ans{font-family:"Fredoka One",cursive;font-size:1rem;letter-spacing:1px;color:white;background:var(--green-dark);border:none;border-radius:10px;padding:12px 24px;cursor:pointer;box-shadow:0 4px 0 #0e6b35;transition:all 0.2s;}
+  .btn-check-ans:hover{transform:translateY(-2px);}
+  .btn-check-ans:disabled{opacity:0.35;cursor:not-allowed;transform:none;}
+  .btn-next-q{font-family:"Fredoka One",cursive;font-size:1rem;letter-spacing:1px;color:white;background:var(--blue);border:none;border-radius:10px;padding:12px 24px;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);transition:all 0.2s;display:none;}
+  .btn-next-q:hover{transform:translateY(-2px);}
+  .btn-next-q.show{display:block;}
+  .btn-clear-ans{font-family:"Nunito",sans-serif;font-size:0.9rem;font-weight:700;color:var(--gray);background:white;border:2px solid var(--border);border-radius:10px;padding:11px 18px;cursor:pointer;transition:all 0.2s;}
+  .btn-clear-ans:hover{border-color:var(--gray);}
+  /* Feedback */
+  .feedback-msg{margin-top:14px;padding:12px 16px;border-radius:10px;font-size:1rem;font-weight:800;display:none;text-align:center;}
+  .feedback-msg.show{display:block;}
+  .feedback-msg.correct{background:var(--green-light);color:var(--green-dark);}
+  .feedback-msg.wrong{background:#fadbd8;color:var(--red-dark);}
+  .correct-ans-show{font-size:0.9rem;font-weight:700;color:var(--gray);margin-top:6px;}
+  .correct-ans-show strong{color:var(--green-dark);}
+  /* Final */
+  .final-screen{max-width:680px;margin:20px auto;padding:0 16px;display:none;}
+  .final-screen.show{display:block;}
+  .final-inner{background:linear-gradient(135deg,#f6d365,#fda085);border-radius:20px;padding:32px 24px;text-align:center;box-shadow:0 6px 24px rgba(253,160,133,0.4);}
+  .final-title{font-family:"Fredoka One",cursive;font-size:2.5rem;color:white;text-shadow:2px 2px 0 rgba(0,0,0,0.15);margin-bottom:8px;}
+  .final-score{font-family:"Fredoka One",cursive;font-size:4rem;color:white;text-shadow:2px 2px 0 rgba(0,0,0,0.15);line-height:1;margin-bottom:8px;}
+  .final-msg{font-size:1.05rem;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:20px;}
+  .btn-again{font-family:"Fredoka One",cursive;font-size:1.1rem;color:#fda085;background:white;border:none;border-radius:30px;padding:12px 30px;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.1);transition:all 0.2s;}
+  .btn-again:hover{transform:translateY(-3px);}
+</style>
+</head>
+<body>
+<div class="page-header">
+  <h1>Word Order Challenge!</h1>
+  <p>Was / Were &mdash; Unscramble and Speak!</p>
+</div>
+<div class="stats-bar" id="statsBar">
+  <div class="stats-inner">
+    <div class="stat-item"><div class="stat-label">Score</div><div class="stat-value score-val" id="scoreVal">0</div></div>
+    <div class="stat-item"><div class="stat-label">Question</div><div class="stat-value q-val" id="qVal">1/7</div></div>
+    <div class="timer-wrap">
+      <div class="timer-lbl">&#9201; Time</div>
+      <div class="timer-display" id="timerDisplay">30</div>
+      <div class="timer-bar-track"><div class="timer-bar-fill" id="timerBarFill"></div></div>
+    </div>
+  </div>
+</div>
+<div class="intro-screen" id="introScreen">
+  <div class="intro-inner">
+    <div class="intro-title">&#x1F500; Ready to Speak?</div>
+    <div class="intro-steps">
+      <div class="intro-step"><div class="step-num">1</div>Look at the scrambled words and figure out the correct order</div>
+      <div class="intro-step"><div class="step-num">2</div>&#127908; Press the mic and <strong>say the full sentence out loud!</strong></div>
+      <div class="intro-step"><div class="step-num">3</div>If the mic did not catch you well &mdash; <strong>drag the words</strong> to build the sentence and press Check!</div>
+      <div class="intro-step"><div class="step-num">4</div>You have <strong>30 seconds</strong> per question!</div>
+    </div>
+    <button class="btn-start" id="btnStart">Let us Go! &#127908;</button>
+  </div>
+</div>
+<div class="game-card" id="gameCard">
+  <div class="card-inner" id="cardInner">
+    <div class="q-label" id="qLabel">Question 1 of 7</div>
+    <!-- Scrambled words -->
+    <div class="scrambled-area">
+      <div class="area-label">&#x1F500; Scrambled words:</div>
+      <div class="scrambled-words" id="scrambledWords"></div>
+    </div>
+    <!-- Mic — PRIMARY -->
+    <div class="mic-section" id="micSection">
+      <div class="mic-instruction">&#127908; Step 1: Say the sentence out loud!</div>
+      <div class="mic-controls">
+        <button class="btn-mic" id="btnMic">&#127908;</button>
+        <div class="mic-transcript" id="micTranscript">Your speech will appear here...</div>
+      </div>
+    </div>
+    <!-- Retry hint -->
+    <div class="retry-hint" id="retryHint">
+      &#128073; Mic did not catch you? Drag the words below to build the sentence!
+    </div>
+    <!-- Drag & drop — SECONDARY (starts dimmed) -->
+    <div class="drag-section" id="dragSection">
+      <div class="answer-area">
+        <div class="area-label">&#9999;&#65039; Step 2 (if needed): Drag to build your sentence:</div>
+        <div class="answer-drop" id="answerDrop"><span class="drop-hint">Drag words here...</span></div>
+      </div>
+      <div class="action-btns">
+        <button class="btn-check-ans" id="btnCheckAns">&#10003; Check</button>
+        <button class="btn-clear-ans" id="btnClearAns">&#8635; Clear</button>
+        <button class="btn-next-q" id="btnNextQ">Next &#8594;</button>
+      </div>
+    </div>
+    <div class="feedback-msg" id="feedbackMsg"></div>
+  </div>
+</div>
+<div class="final-screen" id="finalScreen">
+  <div class="final-inner">
+    <div class="final-title" id="finalTitle">&#127942; Well done!</div>
+    <div class="final-score" id="finalScore">7/7</div>
+    <div class="final-msg" id="finalMsg">Excellent speaking skills!</div>
+    <button class="btn-again" id="btnAgain">&#x1F504; Play Again!</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  {words:["yesterday","meeting","the","was","how"],answer:"How was the meeting yesterday?",key:["how","was","meeting","yesterday"]},
+  {words:["where","you","were","morning","this"],answer:"Where were you this morning?",key:["where","were","you","morning"]},
+  {words:["your","boss","meeting","the","at","was"],answer:"Was your boss at the meeting?",key:["was","boss","meeting"]},
+  {words:["colleagues","your","where","yesterday","were"],answer:"Where were your colleagues yesterday?",key:["where","were","colleagues","yesterday"]},
+  {words:["presentation","how","your","was","yesterday"],answer:"How was your presentation yesterday?",key:["how","was","presentation","yesterday"]},
+  {words:["busy","office","the","was","today"],answer:"Was the office busy today?",key:["was","office","busy","today"]},
+  {words:["you","late","why","were","meeting","the","for"],answer:"Why were you late for the meeting?",key:["why","were","late","meeting"]}
+];
+
+var currentQ=0, score=0, answered=false, micUsed=false;
+var timerInterval=null, timeLeft=30, isListening=false, placedWords=[];
+var recognition=null;
+
+var SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SpeechRec){
+  recognition=new SpeechRec();
+  recognition.lang="en-US";
+  recognition.interimResults=false;
+  recognition.maxAlternatives=5;
+  recognition.onresult=function(e){
+    var transcript=e.results[0][0].transcript.trim();
+    document.getElementById("micTranscript").textContent=transcript;
+    document.getElementById("micTranscript").classList.add("has-text");
+    stopListening();
+    handleMicResult(transcript);
+  };
+  recognition.onerror=function(){ stopListening(); enableDrag(); };
+  recognition.onend=function(){ if(isListening) stopListening(); };
+}else{
+  document.getElementById("btnMic").classList.add("no-support");
+  enableDrag();
+}
+
+document.getElementById("btnStart").addEventListener("click",startGame);
+document.getElementById("btnAgain").addEventListener("click",startGame);
+document.getElementById("btnMic").addEventListener("click",toggleMic);
+document.getElementById("btnCheckAns").addEventListener("click",function(){checkDragAnswer();});
+document.getElementById("btnClearAns").addEventListener("click",clearAnswer);
+document.getElementById("btnNextQ").addEventListener("click",nextQuestion);
+
+var answerDrop=document.getElementById("answerDrop");
+answerDrop.addEventListener("dragenter",function(e){e.preventDefault();answerDrop.classList.add("drag-over");});
+answerDrop.addEventListener("dragover",function(e){e.preventDefault();answerDrop.classList.add("drag-over");});
+answerDrop.addEventListener("dragleave",function(){answerDrop.classList.remove("drag-over");});
+answerDrop.addEventListener("drop",function(e){
+  e.preventDefault();answerDrop.classList.remove("drag-over");
+  var id=e.dataTransfer.getData("text/plain");
+  var tile=document.getElementById(id);
+  if(!tile||tile.classList.contains("used"))return;
+  addWordToAnswer(id,tile.textContent);
+});
+
+function startGame(){
+  currentQ=0;score=0;answered=false;micUsed=false;
+  document.getElementById("introScreen").style.display="none";
+  document.getElementById("finalScreen").classList.remove("show");
+  document.getElementById("statsBar").classList.add("show");
+  document.getElementById("gameCard").classList.add("show");
+  showQuestion();
+}
+
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
+function showQuestion(){
+  answered=false; micUsed=false; placedWords=[];
+  var q=QUESTIONS[currentQ];
+  document.getElementById("qLabel").textContent="Question "+(currentQ+1)+" of "+QUESTIONS.length;
+  document.getElementById("qVal").textContent=(currentQ+1)+"/7";
+  document.getElementById("cardInner").className="card-inner";
+  document.getElementById("feedbackMsg").className="feedback-msg";
+  document.getElementById("feedbackMsg").innerHTML="";
+  document.getElementById("btnNextQ").classList.remove("show");
+  document.getElementById("btnCheckAns").disabled=false;
+  document.getElementById("micTranscript").textContent="Your speech will appear here...";
+  document.getElementById("micTranscript").classList.remove("has-text");
+  document.getElementById("retryHint").classList.remove("show");
+  document.getElementById("micSection").classList.remove("disabled");
+  disableDrag();
+
+  var scrambled=shuffle(q.words);
+  var container=document.getElementById("scrambledWords");
+  container.innerHTML="";
+  scrambled.forEach(function(w,i){
+    var tile=document.createElement("div");
+    tile.className="word-tile"; tile.textContent=w; tile.id="tile-"+i;
+    tile.setAttribute("draggable","true");
+    tile.addEventListener("dragstart",function(e){
+      e.dataTransfer.setData("text/plain",tile.id);
+      setTimeout(function(){tile.classList.add("dragging");},0);
+    });
+    tile.addEventListener("dragend",function(){tile.classList.remove("dragging");});
+    tile.addEventListener("touchstart",touchStart,{passive:true});
+    tile.addEventListener("touchmove",touchMove,{passive:false});
+    tile.addEventListener("touchend",touchEnd);
+    container.appendChild(tile);
+  });
+  resetDropZone();
+  startTimer();
+}
+
+function disableDrag(){document.getElementById("dragSection").classList.remove("enabled");}
+function enableDrag(){document.getElementById("dragSection").classList.add("enabled");}
+
+function addWordToAnswer(tileId,word){
+  var tile=document.getElementById(tileId);
+  tile.classList.add("used");
+  placedWords.push({tileId:tileId,word:word});
+  renderAnswerDrop();
+}
+
+function resetDropZone(){
+  placedWords=[];
+  answerDrop.innerHTML='<span class="drop-hint">Drag words here...</span>';
+  document.querySelectorAll(".word-tile").forEach(function(t){t.classList.remove("used");});
+}
+
+function renderAnswerDrop(){
+  if(placedWords.length===0){answerDrop.innerHTML='<span class="drop-hint">Drag words here...</span>';return;}
+  answerDrop.innerHTML="";
+  placedWords.forEach(function(pw,idx){
+    var placed=document.createElement("div");
+    placed.className="placed-tile";
+    placed.innerHTML='<span>'+pw.word+'</span><button class="remove-tile" data-idx="'+idx+'">&#10005;</button>';
+    placed.querySelector(".remove-tile").addEventListener("click",function(){
+      var i=parseInt(this.getAttribute("data-idx"));
+      var removed=placedWords.splice(i,1)[0];
+      var orig=document.getElementById(removed.tileId);
+      if(orig)orig.classList.remove("used");
+      renderAnswerDrop();
+    });
+    answerDrop.appendChild(placed);
+  });
+}
+
+function clearAnswer(){
+  placedWords.forEach(function(pw){var t=document.getElementById(pw.tileId);if(t)t.classList.remove("used");});
+  placedWords=[];
+  renderAnswerDrop();
+}
+
+var touchDragTile=null,touchDragClone=null;
+function touchStart(e){
+  var tile=e.currentTarget;
+  if(tile.classList.contains("used"))return;
+  touchDragTile=tile;
+  var touch=e.touches[0];
+  touchDragClone=tile.cloneNode(true);
+  touchDragClone.style.cssText="position:fixed;opacity:0.85;pointer-events:none;z-index:9999;border-radius:8px;width:"+tile.offsetWidth+"px;left:"+(touch.clientX-tile.offsetWidth/2)+"px;top:"+(touch.clientY-20)+"px;";
+  document.body.appendChild(touchDragClone);
+  tile.classList.add("dragging");
+}
+function touchMove(e){
+  if(!touchDragClone)return;e.preventDefault();
+  var touch=e.touches[0];
+  touchDragClone.style.left=(touch.clientX-touchDragClone.offsetWidth/2)+"px";
+  touchDragClone.style.top=(touch.clientY-20)+"px";
+  var el=document.elementFromPoint(touch.clientX,touch.clientY);
+  var drop=el?el.closest("#answerDrop"):null;
+  answerDrop.classList.toggle("drag-over",!!drop);
+}
+function touchEnd(e){
+  if(!touchDragTile||!touchDragClone)return;
+  touchDragTile.classList.remove("dragging");
+  var touch=e.changedTouches[0];
+  var el=document.elementFromPoint(touch.clientX,touch.clientY);
+  var drop=el?el.closest("#answerDrop"):null;
+  if(drop)addWordToAnswer(touchDragTile.id,touchDragTile.textContent);
+  touchDragClone.remove();touchDragClone=null;touchDragTile=null;
+  answerDrop.classList.remove("drag-over");
+}
+
+function startTimer(){
+  stopTimer();timeLeft=30;updateTimerDisplay();
+  timerInterval=setInterval(function(){
+    timeLeft--;updateTimerDisplay();
+    if(timeLeft<=0){stopTimer();timeOut();}
+  },1000);
+}
+function stopTimer(){if(timerInterval){clearInterval(timerInterval);timerInterval=null;}}
+function updateTimerDisplay(){
+  var el=document.getElementById("timerDisplay");
+  var fill=document.getElementById("timerBarFill");
+  el.textContent=timeLeft;
+  fill.style.width=(timeLeft/30*100)+"%";
+  if(timeLeft>=16){el.style.color="var(--green-dark)";fill.style.background="linear-gradient(90deg,var(--green),var(--gold))";}
+  else if(timeLeft>=8){el.style.color="#e67e22";fill.style.background="linear-gradient(90deg,#e67e22,var(--gold))";}
+  else{el.style.color="var(--red)";fill.style.background="var(--red)";}
+}
+function timeOut(){
+  if(answered)return;
+  answered=true;stopListening();
+  document.getElementById("btnCheckAns").disabled=true;
+  document.getElementById("cardInner").className="card-inner state-wrong";
+  var q=QUESTIONS[currentQ];
+  var fb=document.getElementById("feedbackMsg");
+  fb.innerHTML='&#9200; Time is up! <div class="correct-ans-show">Correct answer: <strong>'+q.answer+'</strong></div>';
+  fb.className="feedback-msg show wrong";
+  if(currentQ+1<QUESTIONS.length)document.getElementById("btnNextQ").classList.add("show");
+  else setTimeout(showFinal,1200);
+}
+
+function toggleMic(){
+  if(!recognition)return;
+  if(isListening)stopListening();else startListening();
+}
+function startListening(){
+  if(!recognition||answered)return;
+  isListening=true;
+  document.getElementById("btnMic").classList.add("listening");
+  document.getElementById("micTranscript").textContent="Listening...";
+  document.getElementById("micTranscript").classList.remove("has-text");
+  try{recognition.start();}catch(e){stopListening();enableDrag();}
+}
+function stopListening(){
+  isListening=false;
+  document.getElementById("btnMic").classList.remove("listening");
+  try{recognition.stop();}catch(e){}
+}
+
+function handleMicResult(text){
+  micUsed=true;
+  var q=QUESTIONS[currentQ];
+  var lower=text.toLowerCase();
+  var found=q.key.filter(function(kw){return lower.indexOf(kw.toLowerCase())!==-1;});
+  var isCorrect=found.length>=Math.ceil(q.key.length*0.7);
+  if(isCorrect){
+    stopTimer();answered=true;
+    score++;document.getElementById("scoreVal").textContent=score;
+    document.getElementById("cardInner").className="card-inner state-correct";
+    var fb=document.getElementById("feedbackMsg");
+    fb.innerHTML="&#127881; Great job! Well said!";
+    fb.className="feedback-msg show correct";
+    document.getElementById("micSection").classList.add("disabled");
+    enableDrag();
+    if(currentQ+1<QUESTIONS.length)document.getElementById("btnNextQ").classList.add("show");
+    else setTimeout(showFinal,1200);
+  } else {
+    // Mic failed — enable drag fallback
+    document.getElementById("cardInner").className="card-inner state-retry";
+    document.getElementById("retryHint").classList.add("show");
+    document.getElementById("micSection").classList.add("disabled");
+    enableDrag();
+    var fb=document.getElementById("feedbackMsg");
+    fb.innerHTML="&#128249; Not quite! Try dragging the words below.";
+    fb.className="feedback-msg show wrong";
+  }
+}
+
+function checkDragAnswer(){
+  if(answered)return;
+  if(placedWords.length===0){
+    document.getElementById("feedbackMsg").textContent="Drag the words first!";
+    document.getElementById("feedbackMsg").className="feedback-msg show wrong";
+    return;
+  }
+  stopTimer();answered=true;
+  document.getElementById("btnCheckAns").disabled=true;
+  var q=QUESTIONS[currentQ];
+  var text=placedWords.map(function(pw){return pw.word;}).join(" ").toLowerCase();
+  var found=q.key.filter(function(kw){return text.indexOf(kw.toLowerCase())!==-1;});
+  var isCorrect=found.length>=Math.ceil(q.key.length*0.7);
+  if(isCorrect)score++;
+  document.getElementById("scoreVal").textContent=score;
+  var card=document.getElementById("cardInner");
+  var fb=document.getElementById("feedbackMsg");
+  if(isCorrect){
+    card.className="card-inner state-correct";
+    fb.innerHTML="&#127881; Correct! Well done!";
+    fb.className="feedback-msg show correct";
+    document.querySelectorAll(".placed-tile").forEach(function(t){t.classList.add("correct-tile");});
+  } else {
+    card.className="card-inner state-wrong";
+    fb.innerHTML='&#10060; Not quite! <div class="correct-ans-show">Correct answer: <strong>'+q.answer+'</strong></div>';
+    fb.className="feedback-msg show wrong";
+    document.querySelectorAll(".placed-tile").forEach(function(t){t.classList.add("wrong-tile");});
+  }
+  if(currentQ+1<QUESTIONS.length)document.getElementById("btnNextQ").classList.add("show");
+  else setTimeout(showFinal,1200);
+}
+
+function nextQuestion(){
+  currentQ++;
+  document.getElementById("btnNextQ").classList.remove("show");
+  showQuestion();
+}
+
+function showFinal(){
+  document.getElementById("gameCard").classList.remove("show");
+  document.getElementById("statsBar").classList.remove("show");
+  document.getElementById("finalScreen").classList.add("show");
+  document.getElementById("finalScore").textContent=score+"/7";
+  var pct=score/7;
+  var title,msg;
+  if(pct===1){title="&#127942; Perfect!";msg="Outstanding! All sentences correct!";}
+  else if(pct>=0.7){title="&#11088; Great job!";msg="Excellent speaking skills!";}
+  else if(pct>=0.5){title="&#128077; Good effort!";msg="Keep practicing your word order!";}
+  else{title="&#128170; Keep going!";msg="Try again, you are getting better!";}
+  document.getElementById("finalTitle").innerHTML=title;
+  document.getElementById("finalMsg").textContent=msg;
+}
+</script>
+</body>
+</html>
